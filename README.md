@@ -1,3 +1,12 @@
+# ESC POS with Angular - Comandos ESC POS con Angular
+
+
+Imprimir tickets en impresora térmica con Angular y TypeScript usando mi plugin gratuito.
+
+
+Explicación y código en: https://parzibyte.me/blog/2022/12/01/conectar-angular-impresora-termica-imprimir-tickets/
+
+
 # ThermalPrinterAngular
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 12.2.3.
