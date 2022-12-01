@@ -2,8 +2,9 @@ const ConectorPluginV3 = (() => {
 
     /**
      * Una clase para interactuar con el plugin v3
+     * desde TypeScript
      *
-     * @date 2022-09-28
+     * @date 2022-12-01
      * @author parzibyte
      * @see https://parzibyte.me/blog
      */
