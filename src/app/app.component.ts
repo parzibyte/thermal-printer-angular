@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import ConectorPluginV3 from "./ConectorPluginV3";
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -13,7 +12,10 @@ export class AppComponent implements OnInit {
   mensaje: string = "";
 
   async ngOnInit() {
-    this.impresoras = await ConectorPluginV3.obtenerImpresoras();
+    // https://parzibyte.me/http-esc-pos-desktop-docs/es/api/obtener-impresoras.html
+    const respuestaHttp = await fetch("http://localhost:8000/impresoras");
+    const impresoras = await respuestaHttp.json();
+    this.impresoras = impresoras;
   }
 
   async probarImpresion() {
@@ -24,22 +26,57 @@ export class AppComponent implements OnInit {
     if (!this.mensaje) {
       return alert("Escribe un mensaje");
     }
-    const conector = new ConectorPluginV3();
-    conector
-      .Iniciar()
-      .EstablecerAlineacion(ConectorPluginV3.ALINEACION_CENTRO)
-      .EscribirTexto("Hola Angular desde parzibyte.me")
-      .Feed(1)
-      .EscribirTexto(this.mensaje)
-      .Feed(1)
-      .DescargarImagenDeInternetEImprimir("https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Angular_full_color_logo.svg/1200px-Angular_full_color_logo.svg.png", ConectorPluginV3.TAMAÑO_IMAGEN_NORMAL, 400)
-      .Iniciar()
-      .Feed(1);
-    const respuesta = await conector.imprimirEn(this.impresoraSeleccionada);
-    if (respuesta == true) {
-      console.log("Impresión correcta");
+    // Lista de operaciones disponibles: https://parzibyte.me/http-esc-pos-desktop-docs/es/
+    const operaciones = [
+      {
+        nombre: "Iniciar",
+        argumentos: [],
+      },
+      {
+        nombre: "EstablecerAlineacion",
+        argumentos: [1],
+      },
+
+      {
+        nombre: "EscribirTexto",
+        argumentos: ["Hola Angular desde parzibyte.me"],
+      },
+      {
+        nombre: "Feed",
+        argumentos: [1],
+      },
+      {
+        nombre: "EscribirTexto",
+        argumentos: [this.mensaje],
+      },
+      {
+        nombre: "Feed",
+        argumentos: [1],
+      },
+      {
+        nombre: "DescargarImagenDeInternetEImprimir",
+        argumentos: ["https://github.com/parzibyte.png", 380, 0, true],
+      },
+    ];
+
+    // https://parzibyte.me/http-esc-pos-desktop-docs/es/api/imprimir.html
+    const cargaUtil = {
+      nombreImpresora: this.impresoraSeleccionada,
+      serial: "",
+      operaciones: operaciones,
+    };
+
+
+    const respuestaHttp = await fetch("http://localhost:8000/imprimir", {
+      method: "POST",
+      body: JSON.stringify(cargaUtil),
+    })
+
+    const respuesta = await respuestaHttp.json();
+    if (respuesta.ok) {
+      console.log("Impreso correctamente");
     } else {
-      console.log("Error: " + respuesta);
+      console.error("Petición realizada pero error en el plugin: " + respuesta.message);
     }
   }
 }
